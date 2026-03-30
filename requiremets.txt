@@ -1,0 +1,13 @@
+transformers==4.36.2
+torch
+sentence-transformers
+faiss-cpu
+langchain
+llama-index
+datasets
+accelerate
+numpy
+pandas
+scikit-learn
+python-dotenv
+tqdm
