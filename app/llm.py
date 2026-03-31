@@ -2,7 +2,7 @@ from transformers import pipeline
 
 class LLMService:
 
-    def __init__(self, model_name = "google/flan-t5-base"):
+    def __init__(self, model_name = "google/flan-t5-small"):
         self.pipeline = pipeline("text-generation", model=model_name, device= -1)
 
     def generate(self, prompt, max_new_tokens=500):
