@@ -13,7 +13,7 @@ class LLMService:
         self.use_api_fallback = use_api_fallback
 
         try:
-            self.pipeline = pipeline("text2text-generation", model=self.modle_name, device=1)
+            self.pipeline = pipeline("text-generation", model=self.modle_name, device=1)
 
             self.local_available = True
         except Exception as e:
