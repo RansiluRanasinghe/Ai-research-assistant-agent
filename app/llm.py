@@ -8,12 +8,12 @@ load_dotenv()
 
 class LLMService:
 
-    def __init__(self, model_name = "distilgpt2", use_api_fallback=True):
+    def __init__(self, model_name = "google/flan-t5-small", use_api_fallback=True):
         self.modle_name = model_name
         self.use_api_fallback = use_api_fallback
 
         try:
-            self.pipeline = pipeline("text-generation", model=self.modle_name, device= -1)
+            self.pipeline = pipeline("text2text-generation", model=self.modle_name, device= -1)
 
             self.local_available = True
         except Exception as e:
