@@ -42,4 +42,10 @@ class VectorStore:
 
         self.index = faiss.read_index(os.path.join(path, "index.faiss"))
         self.chunks = np.load(os.path.join(path, "chunks.npy"), allow_pickle=True).tolist()
-        self.dimension = self.index.d    
+        self.dimension = self.index.d
+
+class RAGPipeline:
+
+    def __init__(self, vector_store, llm_service):
+        self.vector_store = vector_store
+        self.llm_service = llm_service         
