@@ -35,7 +35,11 @@ class VectorStore:
     def save(self, path):
 
         os.makedirs(path, exist_ok=True)
-        faiss.write_index(self.index, os.path.join(path, "faiss_index.bin"))
+        faiss.write_index(self.index, os.path.join(path, "index.faiss"))
         np.save(os.path.join(path, "chunks.npy"), self.chunks)
-    
-        
+
+    def load(self, path):
+
+        self.index = faiss.read_index(os.path.join(path, "index.faiss"))
+        self.chunks = np.load(os.path.join(path, "chunks.npy"), allow_pickle=True).tolist()
+        self.dimension = self.index.d    
