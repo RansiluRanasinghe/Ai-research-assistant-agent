@@ -11,5 +11,19 @@ class EmbeddingModel:
         if isinstance(texts, str):
             texts = [texts]
 
-        return self.model.encode(texts, batch_size=batch_size, show_progress_bar=False)    
-        
+        return self.model.encode(texts, batch_size=batch_size, show_progress_bar=False)
+
+
+if __name__ == "__main__":
+    emb = EmbeddingModel()
+
+    test_texts = [
+        "Hello, world!",
+        "This is a test sentence.",
+        "Another one for the vector."
+    ]
+
+    vectors = emb.encode(test_texts)
+    print(f"Embedded {len(test_texts)} texts.")
+    print(f"Vector shape: {vectors.shape}")
+    print(f"First vector (first 5 dimensions): {vectors[0][:5]}")
