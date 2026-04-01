@@ -31,3 +31,11 @@ class VectorStore:
         results = [(self.chunks[i], distances[0][j]) for j, i in enumerate(indices[0])]
 
         return results
+    
+    def save(self, path):
+
+        os.makedirs(path, exist_ok=True)
+        faiss.write_index(self.index, os.path.join(path, "faiss_index.bin"))
+        np.save(os.path.join(path, "chunks.npy"), self.chunks)
+    
+        
