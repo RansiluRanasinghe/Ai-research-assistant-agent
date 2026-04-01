@@ -14,4 +14,11 @@ class VectorStore:
         self.index = faiss.IndexFlatL2(dimension)
         self.chunks = []
 
-        
+    def add_documents(self, doc_texts):
+
+        if not doc_texts:
+            return
+
+        vectors = self.emb_model.encode(doc_texts)
+        self.index.add(vectors.astype('float32'))
+        self.chunks.extend(doc_texts)    
