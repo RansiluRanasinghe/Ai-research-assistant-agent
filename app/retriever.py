@@ -1,9 +1,9 @@
 import os
 import numpy as np
 import faiss
-from .embeddings import EmbeddingModel
-from .llm import LLMService
-from .utils import load_document, chunk_text
+from embeddings import EmbeddingModel
+from llm import LLMService
+from utils import load_document, chunk_text
 
 class VectorStore:
 
