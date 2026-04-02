@@ -66,4 +66,38 @@ class RAGPipeline:
 
         answer = self.llm_service.generate(prompt, max_new_tokens=200)
 
-        return answer.strip()            
+        return answer.strip()
+
+if __name__ == "__main__":
+
+    from pathlib import Path
+
+    emb = EmbeddingModel()
+    vector_store = VectorStore(emb)
+
+    docs_dir = Path("../data")
+    if docs_dir.exists():
+        docs = load_document(docs_dir)
+        all_chunks = []
+
+        for doc in docs:
+            chunks = chunk_text(doc, chunk_size=200, overlap=30)
+            all_chunks.extend(chunks)
+
+        vector_store.add_documents(all_chunks)
+        print(f"Added {len(all_chunks)} chunks to the index.")
+
+        query = "What is the main topic?"
+        results = vector_store.search(query)
+        print(f"Search results for '{query}':")
+
+        for i, (chunk, dist) in enumerate(results):
+            print(f"{i+1}. (dist={dist:.2f}) {chunk[:100]}...")
+
+        llm = LLMService()
+        rag = RAGPipeline(vector_store, llm)
+        answer = rag.generate_answer(query)
+        print(f"\nGenerated answer:\n{answer}")
+
+    else:
+        print(f"Documents directory '{docs_dir}' not found. Please add some documents to test the retriever.")        
