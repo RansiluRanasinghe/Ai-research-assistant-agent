@@ -7,7 +7,7 @@ from utils import load_document, chunk_text
 
 class VectorStore:
 
-    def __int__(self, embedding_model, dimension=384):
+    def __init__(self, embedding_model, dimension=384):
         
         self.emb_model = embedding_model
         self.dimension = dimension
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         vector_store.add_documents(all_chunks)
         print(f"Added {len(all_chunks)} chunks to the index.")
 
-        query = "What is the main topic?"
+        query = "What is this file about?"
         results = vector_store.search(query)
         print(f"Search results for '{query}':")
 
