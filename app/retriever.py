@@ -48,4 +48,22 @@ class RAGPipeline:
 
     def __init__(self, vector_store, llm_service):
         self.vector_store = vector_store
-        self.llm_service = llm_service         
+        self.llm_service = llm_service 
+
+    def generate_answer(self, query, top_k=5):
+
+        retrieved = self.vector_store.search(query, top_k=top_k)
+        context = "\n\n".join([chunk for chunk, _ in retrieved])
+
+        prompt = f"""Use the fallowing context to answer the question.
+          if the answer is not in the context, say "I dont know" 
+
+          Context:
+          {context}
+
+          Question: {query}
+          Answer:"""
+
+        answer = self.llm_service.generate(prompt, max_new_tokens=200)
+
+        return answer.strip()            
