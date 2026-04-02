@@ -50,7 +50,7 @@ class RAGPipeline:
         self.vector_store = vector_store
         self.llm_service = llm_service 
 
-    def generate_answer(self, query, top_k=5):
+    def generate_answer(self, query, top_k=1):
 
         retrieved = self.vector_store.search(query, top_k=top_k)
         context = "\n\n".join([chunk for chunk, _ in retrieved])
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         vector_store.add_documents(all_chunks)
         print(f"Added {len(all_chunks)} chunks to the index.")
 
-        query = "What is this file about?"
+        query = "What is the main topic?"
         results = vector_store.search(query)
         print(f"Search results for '{query}':")
 
