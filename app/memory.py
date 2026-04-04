@@ -8,4 +8,15 @@ class Memory:
 
         self.history.append((user_input, assistant_output))
         if len(self.history) > self.max_history:
-            self.history.pop(0)  
+            self.history.pop(0)
+
+    def get_context(self):
+
+        if not self.history:
+            return ""
+        
+        context = "Previous conversations:\n"
+        for user, assistant in self.history:
+            context += f"User: {user}\nAssistant: {assistant}\n"
+
+        return context             
