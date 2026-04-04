@@ -43,4 +43,38 @@ def initialize_system(data_dir = "../data", index_dir = "../vector-store"):
         agent = Agent(rag_pipeline=rag, llm_service=llm)
         memory = Memory(max_history=5)
 
-        return agent, memory       
+        return agent, memory
+
+def main():
+
+    print("AI Research Assistant Agent: ")
+    print("Type 'exit' to quit.\n")
+
+    agent, memory = initialize_system()
+
+    while True:
+        try:
+            query = input("You: ").strip()
+            if query.lower() in ["exit", "quit"]:
+                print("Goodbye!")
+                break
+
+            if not query:
+                print("Please enter a valid question.")
+                continue
+
+            response = agent.run(query)
+            memory.add(query, response)
+
+            print(f"Assistant: {response}\n")
+
+        except KeyboardInterrupt:
+            print("\nGoodbye!")
+            break
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            continue
+
+if __name__ == "__main__":
+    main()            
