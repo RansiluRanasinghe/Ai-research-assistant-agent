@@ -20,7 +20,7 @@ class Agent:
 
 if __name__ == "__main__":
 
-    from unittest import MagicMock
+    from unittest.mock import MagicMock
 
     mock_rag = MagicMock()
     mock_rag.generate_answer.return_value = "Mocked RAG answer."
