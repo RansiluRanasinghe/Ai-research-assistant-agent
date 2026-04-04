@@ -50,10 +50,14 @@ class RAGPipeline:
         self.vector_store = vector_store
         self.llm_service = llm_service 
 
-    def generate_answer(self, query, top_k=1):
+    def generate_answer(self, query, top_k=3):
 
         retrieved = self.vector_store.search(query, top_k=top_k)
         context = "\n\n".join([chunk for chunk, _ in retrieved])
+
+        max_chars = 1600
+        if len(context) > max_chars:
+            context = context[:max_chars] + "..."
 
         prompt = f"""You are a helpful research assistant. Answer the user's question using ONLY the following context.
           if the answer is not in the context, say "I dont know" 

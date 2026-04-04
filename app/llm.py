@@ -8,7 +8,7 @@ load_dotenv()
 
 class LLMService:
 
-    def __init__(self, model_name = "google/flan-t5-small", use_api_fallback=True):
+    def __init__(self, model_name = "google/flan-t5-base", use_api_fallback=True):
         self.modle_name = model_name
         self.use_api_fallback = use_api_fallback
 

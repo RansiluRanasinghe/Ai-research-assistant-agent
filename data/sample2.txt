@@ -1,0 +1,15 @@
+Introduction to Machine Learning
+
+Machine learning is a subset of artificial intelligence that enables systems to learn from data without being explicitly programmed. The core idea is to build algorithms that can identify patterns and make predictions or decisions based on historical data.
+
+There are three main types of machine learning:
+
+1. Supervised Learning: The algorithm learns from labeled data, where each training example has an input and a desired output. Common tasks include classification (e.g., spam detection) and regression (e.g., house price prediction). Popular algorithms: linear regression, decision trees, support vector machines.
+
+2. Unsupervised Learning: The algorithm works on unlabeled data and tries to find hidden structures or groupings. Clustering (e.g., customer segmentation) and dimensionality reduction (e.g., PCA) are typical applications. Examples: K-means, hierarchical clustering.
+
+3. Reinforcement Learning: The agent learns by interacting with an environment, receiving rewards or penalties for actions. It's widely used in robotics, game playing (AlphaGo), and autonomous driving.
+
+A typical machine learning workflow includes: data collection, data preprocessing (cleaning, normalization), feature engineering, model selection, training, evaluation, and hyperparameter tuning. Overfitting and underfitting are common challenges that require careful validation using techniques like cross-validation.
+
+Python has become the dominant language for machine learning, thanks to libraries such as scikit-learn, TensorFlow, PyTorch, and pandas.
