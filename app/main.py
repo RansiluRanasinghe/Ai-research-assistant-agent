@@ -8,7 +8,7 @@ from app.embeddings import EmbeddingModel
 from app.retriever import RAGPipeline, VectorStore
 from app.agent import Agent
 from app.memory import Memory
-from app.utils import load_documents, chunk_text
+from app.utils import load_document, chunk_text
 
 def initialize_system(data_dir = "../data", index_dir = "../vector-store"):
 
@@ -24,7 +24,7 @@ def initialize_system(data_dir = "../data", index_dir = "../vector-store"):
     else:
         print("Building vector store from documents...")
 
-        docs = load_documents(data_dir)
+        docs = load_document(data_dir)
         if not docs:
             print("No documents found. The assistant will only answer general questions.")
         else:
