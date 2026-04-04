@@ -55,7 +55,7 @@ class RAGPipeline:
         retrieved = self.vector_store.search(query, top_k=top_k)
         context = "\n\n".join([chunk for chunk, _ in retrieved])
 
-        prompt = f"""Use the fallowing context to answer the question.
+        prompt = f"""You are a helpful research assistant. Answer the user's question using ONLY the following context.
           if the answer is not in the context, say "I dont know" 
 
           Context:

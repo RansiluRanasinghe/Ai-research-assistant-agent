@@ -14,36 +14,30 @@ def initialize_system(data_dir = "../data", index_dir = "../vector-store"):
 
     llm = LLMService()
     emb = EmbeddingModel()
-
     store = VectorStore(embedding_model=emb)
 
     if Path(index_dir).exists() and (Path(index_dir) / "index.faiss").exists():
         print("Loading existing vector store...")
-        store.load_index(index_dir)
-
+        store.load(index_dir)
     else:
         print("Building vector store from documents...")
-
         docs = load_document(data_dir)
         if not docs:
             print("No documents found. The assistant will only answer general questions.")
         else:
-
             all_chunks = []
             for doc in docs:
                 chunks = chunk_text(doc, chunk_size=300, overlap=50)
                 all_chunks.extend(chunks)
-
             store.add_documents(all_chunks)
             store.save(index_dir)
-
             print(f"Vector store built with {len(all_chunks)} chunks.")
 
-        rag = RAGPipeline(vector_store=store, llm_service=llm)
-        agent = Agent(rag_pipeline=rag, llm_service=llm)
-        memory = Memory(max_history=5)
+    rag = RAGPipeline(vector_store=store, llm_service=llm)
+    agent = Agent(rag_pipeline=rag, llm_service=llm)
+    memory = Memory(max_history=5)
 
-        return agent, memory
+    return agent, memory
 
 def main():
 

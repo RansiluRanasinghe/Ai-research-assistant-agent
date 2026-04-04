@@ -14,7 +14,7 @@ class Agent:
         if any(kw in query.lower() for kw in research_keywords):
             return self.rag.generate_answer(query)
         else:
-            prompt = f"Answer the following question concisely:\n{query}"
+            prompt = f"Answer the following question concisely and factually. If you don't know, say 'I don't know':\n{query}"
             return self.llm_service.generate(prompt, max_new_tokens=100)
 
 
