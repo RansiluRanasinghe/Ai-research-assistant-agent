@@ -25,7 +25,7 @@ class LLMService:
         }
 
         try:
-            response = requests.post(self.use_api_url, json=payload, timeout=10)    
+            response = requests.post(self.use_api_url, json=payload, timeout=120)    
             response.raise_for_status()
 
             return response.json()["response"]
