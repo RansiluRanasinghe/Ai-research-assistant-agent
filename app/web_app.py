@@ -14,9 +14,9 @@ from utils import load_document, chunk_text
 st.set_page_config(page_title="AI Research Assistant", page_icon="🤖", layout="wide")
 st.title("AI Research Assistant")
 
-UPLOAD_DIR = "../user_uploads"
+UPLOAD_DIR = Path("../user_uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
-INDEX_DIR = "../vector-store"
+INDEX_DIR = Path("../vector-store")
 
 @st.cache_resource
 def init_core():
