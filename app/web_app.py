@@ -37,3 +37,28 @@ if "memory" not in st.session_state:
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+
+with st.sidebar:
+    st.header("Document Knowledge Base")
+    uploaded_files = st.file_uploader("Upload PDF or TXT research papers", type=["pdf", "txt"], accept_multiple_files=True)
+
+    if st.button("Index Documents"):
+        if uploaded_files:
+            with st.spinner("Processing documents..."):
+
+                for uploaded_file in uploaded_files:
+                    with open(UPLOAD_DIR / uploaded_file.name, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+
+                docs = load_document(UPLOAD_DIR)
+                all_chunks = []
+                for doc in docs:
+                    chunks = chunks_text(doc, chunk_size=150, overlap=30)
+                    all_chunks.extend(chunks)
+
+                vector_store.add_documents(all_chunks)
+                vector_store.save(str(INDEX_DIR))
+                st.success(f"Indexed {len(all_chunks)} new segments!")
+
+        else:
+            st.error("Please upload files first.")                    
