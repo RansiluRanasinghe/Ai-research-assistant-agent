@@ -1,3 +1,5 @@
+import shutil
+
 import streamlit as st
 import os
 from pathlib import Path
@@ -61,4 +63,10 @@ with st.sidebar:
                 st.success(f"Indexed {len(all_chunks)} new segments!")
 
         else:
-            st.error("Please upload files first.")                    
+            st.error("Please upload files first.")
+
+    if st.button("Clear Knowledge Base"):
+        if UPLOAD_DIR.exists(): shutil.rmtree(UPLOAD_DIR)
+        if INDEX_DIR.exists(): shutil.rmtree(INDEX_DIR)
+        st.session_state.chat_history = []
+        st.rerun()                      
