@@ -3,21 +3,37 @@ from pathlib import Path
 from pypdf import PdfReader
 
 def load_document(path):
-
     docs = []
     path_obj = Path(path)
-
+    
     def process_file(file_path):
-
         if file_path.suffix.lower() == ".pdf":
-            with open(file_path, "rb") as f:
-                reader =PdfReader(f)
-                text = "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
-                return text
-
+            try:
+                with open(file_path, "rb") as f:
+                    reader = PdfReader(f)
+                    text = "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
+                    return text
+            except Exception as e:
+                print(f"Error reading PDF {file_path}: {e}")
+                return None
         elif file_path.suffix.lower() == ".txt":
-            with open(file_path, "r", encoding="utf-8") as f:
-                return f.read()    
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    return f.read()
+            except Exception as e:
+                print(f"Error reading TXT {file_path}: {e}")
+                return None
+        return None
+
+    if path_obj.is_file():
+        content = process_file(path_obj)
+        if content: docs.append(content)
+    elif path_obj.is_dir():
+        for file_path in path_obj.iterdir():
+            content = process_file(file_path)
+            if content: docs.append(content)
+            
+    return docs 
 
 def chunk_text(text, chunk_size=1000, overlap=50):
 
