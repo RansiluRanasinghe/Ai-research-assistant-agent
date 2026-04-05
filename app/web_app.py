@@ -8,7 +8,7 @@ from embeddings import EmbeddingModel
 from retriever import RAGPipeline, VectorStore
 from agent import Agent
 from memory import Memory
-from utils import load_document, chunks_text
+from utils import load_document, chunk_text
 
 
 st.set_page_config(page_title="AI Research Assistant", page_icon="🤖", layout="wide")
@@ -55,7 +55,7 @@ with st.sidebar:
                 docs = load_document(UPLOAD_DIR)
                 all_chunks = []
                 for doc in docs:
-                    chunks = chunks_text(doc, chunk_size=150, overlap=30)
+                    chunks = chunk_text(doc, chunk_size=150, overlap=30)
                     all_chunks.extend(chunks)
 
                 vector_store.add_documents(all_chunks)
