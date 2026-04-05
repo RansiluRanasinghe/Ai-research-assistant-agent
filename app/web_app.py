@@ -15,3 +15,17 @@ st.title("AI Research Assistant")
 UPLOAD_DIR = "../user_uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 INDEX_DIR = "../vector-store"
+
+@st.cache_resource
+def init_core():
+
+    llm = LLMService()
+    emb = EmbeddingModel()
+    store = VectorStore(embedding_model=emb)
+
+    if(INDEX_DIR / "index.faiss").exists():
+        store.load(str(INDEX_DIR))
+
+    rag = RAGPipeline(vector_store=store, llm_service=llm)
+    agent = Agent(rag_pipeline=rag, llm_service=llm)
+    return agent, store    
