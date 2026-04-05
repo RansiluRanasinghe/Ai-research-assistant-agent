@@ -2,25 +2,22 @@ import os
 from pathlib import Path
 from pypdf import PdfReader
 
-def load_document(directory):
+def load_document(path):
 
     docs = []
+    path_obj = Path(path)
 
-    for file_path in Path(directory).iterdir():
+    def process_file(file_path):
 
         if file_path.suffix.lower() == ".pdf":
-            
             with open(file_path, "rb") as f:
-                reader = PdfReader(f)
-                text = "n".join(page.extract_text() for page in reader.pages)
-                docs.append(text)
+                reader =PdfReader(f)
+                text = "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
+                return text
 
         elif file_path.suffix.lower() == ".txt":
             with open(file_path, "r", encoding="utf-8") as f:
-                docs.append(f.read())
-
-
-    return docs
+                return f.read()    
 
 def chunk_text(text, chunk_size=1000, overlap=50):
 
