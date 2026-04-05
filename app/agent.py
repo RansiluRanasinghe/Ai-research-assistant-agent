@@ -7,14 +7,14 @@ class Agent:
         self.rag = rag_pipeline
         self.llm_service = llm_service
 
-    def run(self, query):
+    def run(self, query, memory_context=""):
 
         research_keywords = ["research", "paper", "document", "study", "according to", "what does the"]
 
         if any(kw in query.lower() for kw in research_keywords):
             return self.rag.generate_answer(query)
         else:
-            prompt = f"Answer the following question concisely and factually. If you don't know, say 'I don't know':\n{query}"
+            prompt = f"{memory_context}\nAnswer the following question concisely and factually. If you don't know, say 'I don't know':\n{query}"
             return self.llm_service.generate(prompt, max_new_tokens=100)
 
 
