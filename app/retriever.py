@@ -25,6 +25,9 @@ class VectorStore:
 
     def search(self, query, top_k=3):
 
+        if not self.chunks:
+            return []
+
         query_vec = self.emb_model.encode(query).astype(np.float32).reshape(1, -1)
         distances, indices = self.index.search(query_vec, min(top_k, len(self.chunks)))
 
