@@ -28,4 +28,12 @@ def init_core():
 
     rag = RAGPipeline(vector_store=store, llm_service=llm)
     agent = Agent(rag_pipeline=rag, llm_service=llm)
-    return agent, store    
+    return agent, store
+
+agent, vector_store = init_core()
+
+if "memory" not in st.session_state:
+    st.session_state.memory = Memory(max_history=10)
+
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
