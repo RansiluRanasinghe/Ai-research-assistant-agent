@@ -2,39 +2,64 @@ import os
 from pathlib import Path
 from pypdf import PdfReader
 
-def load_document(directory):
-
+def load_document(path):
     docs = []
-
-    for file_path in Path(directory).iterdir():
-
+    path_obj = Path(path)
+    
+    def process_file(file_path):
         if file_path.suffix.lower() == ".pdf":
-            
-            with open(file_path, "rb") as f:
-                reader = PdfReader(f)
-                text = "n".join(page.extract_text() for page in reader.pages)
-                docs.append(text)
-
+            try:
+                with open(file_path, "rb") as f:
+                    reader = PdfReader(f)
+                    text = "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
+                    return text
+            except Exception as e:
+                print(f"Error reading PDF {file_path}: {e}")
+                return None
         elif file_path.suffix.lower() == ".txt":
-            with open(file_path, "r", encoding="utf-8") as f:
-                docs.append(f.read())
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    return f.read()
+            except Exception as e:
+                print(f"Error reading TXT {file_path}: {e}")
+                return None
+        return None
 
-
-    return docs
+    if path_obj.is_file():
+        content = process_file(path_obj)
+        if content: docs.append(content)
+    elif path_obj.is_dir():
+        for file_path in path_obj.iterdir():
+            content = process_file(file_path)
+            if content: docs.append(content)
+            
+    return docs 
 
 def chunk_text(text, chunk_size=1000, overlap=50):
 
-    words = text.split()
+    sentences = text.replace("\n", " ").split(". ")
     chunks = []
-    start = 0
+    current_chunk = []
+    current_lenght = 0
 
-    while start < len(words):
-        end = start + chunk_size
-        chunk_words = words[start:end]
-        chunks.append(" ".join(chunk_words))
-        start += chunk_size - overlap
+    for sentence in sentences:
+        sentence = sentence.strip() + ". "
+        sentence_length = len(sentence.split())
 
-    return chunks
+        if current_lenght + sentence_length > chunk_size and current_chunk:
+            chunks.append(" ".join(current_chunk).strip())
+
+            overlap_sentences = current_chunk[-1: ] if current_chunk else []
+            current_chunk = overlap_sentences
+            current_lenght = sum(len(s.split()) for s in current_chunk)
+
+        current_chunk.append(sentence)
+        current_lenght += sentence_length
+
+        if current_chunk:
+            chunks.append(" ".join(current_chunk).strip())
+
+        return chunks        
 
 if __name__ == "__main__":
 

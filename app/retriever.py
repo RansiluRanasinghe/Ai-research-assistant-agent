@@ -59,14 +59,14 @@ class RAGPipeline:
         if len(context) > max_chars:
             context = context[:max_chars] + "..."
 
-        prompt = f"""You are a helpful research assistant. Answer the user's question using ONLY the following context.
-          if the answer is not in the context, say "I dont know" 
+        prompt = f"""You are a strict research assistant. You must answer the user's question using ONLY the provided Context. 
+        Do not use outside knowledge. If the exact answer is not contained in the Context, you must reply EXACTLY with "I don't know based on the provided documents."
 
-          Context:
-          {context}
+        Context:
+        {context}
 
-          Question: {query}
-          Answer:"""
+        Question: {query}
+        Answer:"""
 
         answer = self.llm_service.generate(prompt, max_new_tokens=200)
 
