@@ -69,4 +69,21 @@ with st.sidebar:
         if UPLOAD_DIR.exists(): shutil.rmtree(UPLOAD_DIR)
         if INDEX_DIR.exists(): shutil.rmtree(INDEX_DIR)
         st.session_state.chat_history = []
-        st.rerun()                      
+        st.rerun()
+
+for msg in st.session_state.chat_history:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+if prompt :=st.chat_input("Ask a question about your documents..."):
+    st.session_state.chat_history.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        context = st.session_state.memory.get_context()
+        response = agent.run(prompt, memory_context=context)
+        st.markdown(response)
+
+    st.session_state.chat_history.append({"role": "assistant", "content": response})
+    st.session_state.memory.add(prompt, response)                                            
