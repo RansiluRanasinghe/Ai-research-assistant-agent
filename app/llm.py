@@ -8,47 +8,32 @@ load_dotenv()
 
 class LLMService:
 
-    def __init__(self, model_name = "google/flan-t5-base", use_api_fallback=True):
+    def __init__(self, model_name = "llama3.2:1b", use_api_fallback=True):
         self.modle_name = model_name
-        self.use_api_fallback = use_api_fallback
+        self.use_api_url = "http://localhost:11434/api/generate"
 
-        try:
-            self.pipeline = pipeline("text2text-generation", model=self.modle_name, device= -1)
-
-            self.local_available = True
-        except Exception as e:
-            print(f"Error loading local model: {e}")
-            self.local_available = False
-
-            self.api_token = os.getenv("HF_TOKEN")
-            self.api_url = f"https://api-inference.huggingface.co/models/{model_name}"
-            self.headers = {"Authorization": f"Bearer {self.api_token}"}
 
     def generate(self, prompt, max_new_tokens=500):
 
-        formatted_prompt = f"Answer the following question clearly:\n{prompt}"
-        
-        if self.local_available:
-            try:
-                response = self.pipeline(formatted_prompt, max_new_tokens=max_new_tokens)
-                return response[0]['generated_text']
-            except Exception as e:
-                print("Local failed, switching to API:", e)
-
-        if self.use_api_fallback:
-            payload = payload = {
-                "inputs": formatted_prompt,
-                "parameters": {"max_new_tokens": max_new_tokens}
+        payload = {
+            "model" : self.modle_name,
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "max_new_tokens": max_new_tokens
             }
+        }
 
-            response = requests.post(self.api_url, headers=self.headers, json=payload)
+        try:
+            response = requests.post(self.use_api_url, json=payload, timeout=10)    
+            response.raise_for_status()
 
-            try:
-                return response.json()[0]['generated_text']
-            except Exception as e:
-                return str(response.json)
-
-        return "No model available"            
+            return response.json()["response"]
+        
+        except requests.options.ConnectionError:
+            return "Error: Could not connect to Ollama. Is the Ollama app running in your system tray?"
+        except Exception as e:
+            return f"Error during generation: {str(e)}"
     
 if __name__ == "__main__":
     llm = LLMService()
