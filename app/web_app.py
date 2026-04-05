@@ -1,4 +1,5 @@
 import shutil
+import time
 
 import streamlit as st
 import os
@@ -17,6 +18,11 @@ st.title("AI Research Assistant")
 UPLOAD_DIR = Path("../user_uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 INDEX_DIR = Path("../vector-store")
+
+def stream_text(text):
+    for word in text.split(" "):
+        yield word + " "
+        time.sleep(0.05)
 
 @st.cache_resource
 def init_core():
@@ -89,7 +95,7 @@ if prompt :=st.chat_input("Ask a question about your documents..."):
         context = st.session_state.memory.get_context()
         response = agent.run(prompt, memory_context=context)
         response = response.replace("Assistant:", "").replace("User:", "").strip()
-        st.markdown(response)
+        st.write_stream(stream_text(response))
 
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     st.session_state.memory.add(prompt, response)                                            
