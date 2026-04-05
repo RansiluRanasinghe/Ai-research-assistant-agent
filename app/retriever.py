@@ -62,8 +62,10 @@ class RAGPipeline:
         if len(context) > max_chars:
             context = context[:max_chars] + "..."
 
-        prompt = f"""You are a helpful Research Assistant. Answer the user's question using the Context below. 
-        If the context does not contain the answer, use your best judgment based on the provided text.
+        prompt = f"""You are an expert, factual Research Assistant. 
+        Answer the user's question clearly and accurately using ONLY the information provided in the Context below. 
+        Do not use your own general knowledge. Do not guess. 
+        If the exact answer is not contained in the Context, you must reply: "The provided documents do not contain enough information to answer this."
 
         Context:
         {context}

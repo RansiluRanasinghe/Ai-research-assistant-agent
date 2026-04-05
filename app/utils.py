@@ -56,10 +56,10 @@ def chunk_text(text, chunk_size=1000, overlap=50):
         current_chunk.append(sentence)
         current_lenght += sentence_length
 
-        if current_chunk:
-            chunks.append(" ".join(current_chunk).strip())
+    if current_chunk:
+        chunks.append(" ".join(current_chunk).strip())
 
-        return chunks        
+    return chunks        
 
 if __name__ == "__main__":
 
