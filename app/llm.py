@@ -20,7 +20,7 @@ class LLMService:
             "prompt": prompt,
             "stream": False,
             "options": {
-                "max_new_tokens": max_new_tokens
+                "num_predict": max_new_tokens
             }
         }
 
@@ -30,7 +30,7 @@ class LLMService:
 
             return response.json()["response"]
         
-        except requests.options.ConnectionError:
+        except requests.exceptions.ConnectionError:
             return "Error: Could not connect to Ollama. Is the Ollama app running in your system tray?"
         except Exception as e:
             return f"Error during generation: {str(e)}"
