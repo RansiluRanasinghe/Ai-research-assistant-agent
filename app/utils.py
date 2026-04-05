@@ -21,17 +21,29 @@ def load_document(path):
 
 def chunk_text(text, chunk_size=1000, overlap=50):
 
-    words = text.split()
+    sentences = text.replace("\n", " ").split(". ")
     chunks = []
-    start = 0
+    current_chunk = []
+    current_lenght = 0
 
-    while start < len(words):
-        end = start + chunk_size
-        chunk_words = words[start:end]
-        chunks.append(" ".join(chunk_words))
-        start += chunk_size - overlap
+    for sentence in sentences:
+        sentence = sentence.strip() + ". "
+        sentence_length = len(sentence.split())
 
-    return chunks
+        if current_lenght + sentence_length > chunk_size and current_chunk:
+            chunks.append(" ".join(current_chunk).strip())
+
+            overlap_sentences = current_chunk[-1: ] if current_chunk else []
+            current_chunk = overlap_sentences
+            current_lenght = sum(len(s.split()) for s in current_chunk)
+
+        current_chunk.append(sentence)
+        current_lenght += sentence_length
+
+        if current_chunk:
+            chunks.append(" ".join(current_chunk).strip())
+
+        return chunks        
 
 if __name__ == "__main__":
 
