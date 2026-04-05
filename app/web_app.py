@@ -83,6 +83,7 @@ if prompt :=st.chat_input("Ask a question about your documents..."):
     with st.chat_message("assistant"):
         context = st.session_state.memory.get_context()
         response = agent.run(prompt, memory_context=context)
+        response = response.replace("Assistant:", "").replace("User:", "").strip()
         st.markdown(response)
 
     st.session_state.chat_history.append({"role": "assistant", "content": response})
