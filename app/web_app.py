@@ -65,10 +65,15 @@ with st.sidebar:
         else:
             st.error("Please upload files first.")
 
-    if st.button("Clear Knowledge Base"):
+    if st.button("Clear All Knowledge"):
         if UPLOAD_DIR.exists(): shutil.rmtree(UPLOAD_DIR)
         if INDEX_DIR.exists(): shutil.rmtree(INDEX_DIR)
+        
+        init_core.clear()
+        st.session_state.memory = Memory(max_history=10)
+        
         st.session_state.chat_history = []
+        
         st.rerun()
 
 for msg in st.session_state.chat_history:
