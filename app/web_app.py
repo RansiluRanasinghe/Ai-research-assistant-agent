@@ -65,7 +65,7 @@ if "chat_history" not in st.session_state:
 if "is_processing" not in st.session_state:
     st.session_state.is_processing = False
 
-if "processed_fiels" not in st.session_state:
+if "processed_files" not in st.session_state:
     st.session_state.processed_files = []     
 
 with st.sidebar:
@@ -101,6 +101,10 @@ with st.sidebar:
                 vector_store.save(str(INDEX_DIR))
 
                 status.update(label=f"Ready! Indexed {len(all_chunks)} chunks ", state="complete", expanded=False)
+
+            st.session_state.processed_files = current_file_names
+            st.session_state.is_processing = False
+            st.rerun()    
 
         elif not uploaded_files and st.session_state.processed_files:
             st.session_state.processed_files = []                    
