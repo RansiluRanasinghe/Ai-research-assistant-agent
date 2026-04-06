@@ -58,14 +58,9 @@ class RAGPipeline:
         retrieved = self.vector_store.search(query, top_k=top_k)
         context = "\n\n".join([chunk for chunk, _ in retrieved])
 
-        max_chars = 1600
-        if len(context) > max_chars:
-            context = context[:max_chars] + "..."
-
-        prompt = f"""You are an expert, factual Research Assistant. 
-        Answer the user's question clearly and accurately using ONLY the information provided in the Context below. 
-        Do not use your own general knowledge. Do not guess. 
-        If the exact answer is not contained in the Context, you must reply: "The provided documents do not contain enough information to answer this."
+        prompt = f"""You are a precise Research Assistant. 
+        Read the Context below. Answer the Question using ONLY the facts in the Context. 
+        Be direct, concise, and do not add outside information.
 
         Context:
         {context}
