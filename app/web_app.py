@@ -119,7 +119,7 @@ for msg in st.session_state.chat_history:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-if prompt :=st.chat_input("Ask a question about your documents..."):
+if prompt :=st.chat_input("Ask a question about your documents...", disabled=st.session_state.is_processing):
     st.session_state.chat_history.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
