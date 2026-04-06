@@ -15,6 +15,22 @@ from utils import load_document, chunk_text
 st.set_page_config(page_title="AI Research Assistant", page_icon="🤖", layout="wide")
 st.title("AI Research Assistant")
 
+st.markdown("""
+        <style>
+            @keyframe pulse {
+                0% {opacity: 1;}
+                50% {opacity: 0.3;}
+                100% {opacity: 1;}
+            }
+
+            .thinking-text{
+                animation: pulse 1.5s infinite;
+                font-style: italic;
+                color: #888888;
+            }    
+        </style>
+""", unsafe_allow_html=True)
+
 UPLOAD_DIR = Path("../user_uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 INDEX_DIR = Path("../vector-store")
@@ -93,8 +109,15 @@ if prompt :=st.chat_input("Ask a question about your documents..."):
 
     with st.chat_message("assistant"):
         context = st.session_state.memory.get_context()
+
+        think_placeholder = st.empty()
+        think_placeholder.markdown("<div class='thinking-text'>Thinking... </div>", unsafe_allow_html=True)
+
         response = agent.run(prompt, memory_context=context)
         response = response.replace("Assistant:", "").replace("User:", "").strip()
+
+        think_placeholder.empty()
+
         st.write_stream(stream_text(response))
 
     st.session_state.chat_history.append({"role": "assistant", "content": response})
