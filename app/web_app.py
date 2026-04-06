@@ -62,6 +62,12 @@ if "memory" not in st.session_state:
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
+if "is_processing" not in st.session_state:
+    st.session_state.is_processing = False
+
+if "processed_fiels" not in st.session_state:
+    st.session_state.processed_files = []     
+
 with st.sidebar:
     st.header("Document Knowledge Base")
     uploaded_files = st.file_uploader("Upload PDF or TXT research papers", type=["pdf", "txt"], accept_multiple_files=True)
