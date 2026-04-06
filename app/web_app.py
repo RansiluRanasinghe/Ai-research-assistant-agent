@@ -70,28 +70,41 @@ if "processed_fiels" not in st.session_state:
 
 with st.sidebar:
     st.header("Document Knowledge Base")
-    uploaded_files = st.file_uploader("Upload PDF or TXT research papers", type=["pdf", "txt"], accept_multiple_files=True)
+    uploaded_files = st.file_uploader("Upload PDF or TXT research papers", type=["pdf", "txt"],
+                                       accept_multiple_files=True, key="file_uploader")
+    
 
-    if st.button("Index Documents"):
-        if uploaded_files:
-            with st.spinner("Processing documents..."):
+    if uploaded_files:
+
+        current_file_names = [f.name for f in uploaded_files]
+
+        if current_file_names != st.session_state.processed_files:
+            st.session_state.is_processing = True
+
+            with st.status("Analyzing documents...", expanded=True) as status:
+                st.write("Saving files to workspace...")
 
                 for uploaded_file in uploaded_files:
                     with open(UPLOAD_DIR / uploaded_file.name, "wb") as f:
                         f.write(uploaded_file.getbuffer())
 
+                st.write("Chunking text ...")
                 docs = load_document(UPLOAD_DIR)
                 all_chunks = []
+
                 for doc in docs:
-                    chunks = chunk_text(doc, chunk_size=150, overlap=30)
+                    chunks = chunk_text(doc, chunk_size=300, overlap=50)
                     all_chunks.extend(chunks)
 
+                st.write("Building Vector Database ...")
                 vector_store.add_documents(all_chunks)
                 vector_store.save(str(INDEX_DIR))
-                st.success(f"Indexed {len(all_chunks)} new segments!")
 
-        else:
-            st.error("Please upload files first.")
+                status.update(label=f"Ready! Indexed {len(all_chunks)} chunks ", state="complete", expanded=False)
+
+        elif not uploaded_files and st.session_state.processed_files:
+            st.session_state.processed_files = []                    
+
 
     if st.button("Clear All Knowledge"):
         if UPLOAD_DIR.exists(): shutil.rmtree(UPLOAD_DIR)
