@@ -90,7 +90,7 @@ class RAGPipeline:
 
     def generate_answer(self, query, top_k=6, max_new_tokens=300):
 
-        retrieved = self.vector_store.search(query, top_k=top_k)
+        retrieved = self.vector_store.hybrid_search(query, top_k=top_k)
         context = "\n\n".join([chunk for chunk, _ in retrieved])
 
         prompt = f"""You are a precise Research Assistant. 
