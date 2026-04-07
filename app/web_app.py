@@ -119,9 +119,43 @@ with st.sidebar:
         st.session_state.processed_files = []
         st.rerun()
 
+    st.divider()
+    st.header("Utility Actions")
+
+    if st.session_state.get("processed_files"):
+        if st.button("Generate Summary Report"):
+
+            with st.spinner("Writing Summary ..."):
+
+                summary_prompt = f"""Write a comprehensive summary of the main themes and findings present in this document.
+                  Format it beautifully using Markdown."""
+
+                summary_response, _  = agent.run(summary_prompt, memory_context="", max_new_tokens=1500)
+
+                st.success("Summary Generated!")
+                st.download_button("Download Summary", data=summary_response, file_name="research_summary.md", mime="text/markdown")
+
+        if st.button("Extract Statistical Data"):
+            with st.spinner("Mining Data ..."):
+
+                stat_prompt = """Extract all numbers, percentages, and statistical data points from the document.
+                  Present them in a strict Markdown table with two columns: 'Data Point' and 'Context'."""
+                
+                stat_response, _  = agent.run(stat_prompt, memory_context="", max_new_tokens=1500)
+
+                st.success("Data Extracted!")
+                st.download_button("Download Data", data=stat_response, file_name="statistical_data.md", mime="text/markdown")
+
+    else:
+        st.info("Upload and index a document to unlock Utility Actions.")            
+
+
 for msg in st.session_state.chat_history:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
+        if msg.get("source_context"):
+            with st.expander("View Source Context"):
+                st.text(msg["source_context"])
 
 if prompt :=st.chat_input("Ask a question about your documents...", disabled=st.session_state.is_processing):
     st.session_state.chat_history.append({"role": "user", "content": prompt})
@@ -134,12 +168,20 @@ if prompt :=st.chat_input("Ask a question about your documents...", disabled=st.
         think_placeholder = st.empty()
         think_placeholder.markdown("<div class='thinking-text'>Thinking... </div>", unsafe_allow_html=True)
 
-        response = agent.run(prompt, memory_context=context)
+        response, source_context = agent.run(prompt, memory_context=context)
         response = response.replace("Assistant:", "").replace("User:", "").strip()
 
         think_placeholder.empty()
 
         st.write_stream(stream_text(response))
 
-    st.session_state.chat_history.append({"role": "assistant", "content": response})
+        if source_context:
+            with st.expander("View Source Context"):
+                st.text(source_context)
+
+    st.session_state.chat_history.append({
+        "role": "assistant",
+        "content": response, 
+        "source_context": source_context})
+    
     st.session_state.memory.add(prompt, response)                                            

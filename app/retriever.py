@@ -5,6 +5,9 @@ from embeddings import EmbeddingModel
 from llm import LLMService
 from utils import load_document, chunk_text
 
+import pickle
+from rank_bm25 import BM25Okapi
+
 class VectorStore:
 
     def __init__(self, embedding_model, dimension=384):
@@ -13,33 +16,62 @@ class VectorStore:
         self.dimension = dimension
         self.index = faiss.IndexFlatL2(dimension)
         self.chunks = []
+        self.bm25 = None
 
     def add_documents(self, doc_texts):
 
         if not doc_texts:
             return
 
+        #Faiss to vector
         vectors = self.emb_model.encode(doc_texts)
         self.index.add(vectors.astype(np.float32))
         self.chunks.extend(doc_texts)
 
-    def search(self, query, top_k=3):
+        # BM25 for sparse retrieval
+        tokenized_corpus = [doc.lower().split(" ") for doc in self.chunks]
+        self.bm25 = BM25Okapi(tokenized_corpus)
+
+    def hybrid_search(self, query, top_k=6):
 
         if not self.chunks:
-            return []
+            return [], 999.0
 
         query_vec = self.emb_model.encode(query).astype(np.float32).reshape(1, -1)
         distances, indices = self.index.search(query_vec, min(top_k, len(self.chunks)))
+        faiss_results = [self.chunks[i] for i in indices[0]]
 
-        results = [(self.chunks[i], distances[0][j]) for j, i in enumerate(indices[0])]
+        best_distance = distances[0][0] if len(distances[0]) > 0 else 999.0
 
-        return results
-    
+        tokenized_query = query.lower().split(" ")
+        bm25_scores = self.bm25.get_scores(tokenized_query)
+        bm25_indices = np.argsort(bm25_scores)[::-1][:top_k]
+        bm25_results = [self.chunks[i] for i in bm25_indices]
+
+        combined_results = []
+        seen = set()
+
+        import itertools
+        for f_chunk, b_chunk in itertools.zip_longest(faiss_results, bm25_results):
+            if f_chunk and f_chunk not in seen:
+                combined_results.append((f_chunk, 0.0))
+                seen.add(f_chunk)
+
+            if b_chunk and b_chunk not in seen:
+                combined_results.append((b_chunk, 0.0))
+                seen.add(b_chunk)    
+
+        return combined_results[:top_k], best_distance
+
     def save(self, path):
 
         os.makedirs(path, exist_ok=True)
         faiss.write_index(self.index, os.path.join(path, "index.faiss"))
         np.save(os.path.join(path, "chunks.npy"), self.chunks)
+
+        if self.bm25:
+            with open(os.path.join(path, "bm25.pkl"), "wb") as f:
+                pickle.dump(self.bm25, f)
 
     def load(self, path):
 
@@ -47,15 +79,20 @@ class VectorStore:
         self.chunks = np.load(os.path.join(path, "chunks.npy"), allow_pickle=True).tolist()
         self.dimension = self.index.d
 
+        bm25_path = os.path.join(path, "bm25.pkl")
+        if os.path.exists(bm25_path):
+            with open(bm25_path, "rb") as f:
+                self.bm25 = pickle.load(f)
+
 class RAGPipeline:
 
     def __init__(self, vector_store, llm_service):
         self.vector_store = vector_store
         self.llm_service = llm_service 
 
-    def generate_answer(self, query, top_k=6):
+    def generate_answer(self, query, top_k=6, max_new_tokens=300):
 
-        retrieved = self.vector_store.search(query, top_k=top_k)
+        retrieved, best_distance = self.vector_store.hybrid_search(query, top_k=top_k)
         context = "\n\n".join([chunk for chunk, _ in retrieved])
 
         prompt = f"""You are a precise Research Assistant. 
@@ -68,9 +105,9 @@ class RAGPipeline:
         Question: {query}
         Answer:"""
 
-        answer = self.llm_service.generate(prompt, max_new_tokens=200)
+        answer = self.llm_service.generate(prompt, max_new_tokens=max_new_tokens)
 
-        return answer.strip()
+        return answer.strip(), context, best_distance
 
 if __name__ == "__main__":
 

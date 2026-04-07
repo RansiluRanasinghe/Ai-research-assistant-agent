@@ -5,3 +5,5 @@ faiss-cpu
 pypdf
 numpy
 streamlit
+rank_bm25
+ddgs
