@@ -16,25 +16,30 @@ class VectorStore:
         self.dimension = dimension
         self.index = faiss.IndexFlatL2(dimension)
         self.chunks = []
+        self.bm25 = None
 
     def add_documents(self, doc_texts):
 
         if not doc_texts:
             return
 
+        #Faiss to vector
         vectors = self.emb_model.encode(doc_texts)
         self.index.add(vectors.astype(np.float32))
         self.chunks.extend(doc_texts)
 
-    def search(self, query, top_k=3):
+        # BM25 for sparse retrieval
+        tokenized_corpus = [doc.lower().split(" ") for doc in self.chunks]
+        self.bm25 = BM25Okapi(tokenized_corpus)
+
+    def hybrid_search(self, query, top_k=6):
 
         if not self.chunks:
             return []
 
         query_vec = self.emb_model.encode(query).astype(np.float32).reshape(1, -1)
         distances, indices = self.index.search(query_vec, min(top_k, len(self.chunks)))
-
-        results = [(self.chunks[i], distances[0][j]) for j, i in enumerate(indices[0])]
+        faiss_results = [self.chunks[i] for i in indices[0]]
 
         return results
     
