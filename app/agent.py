@@ -15,7 +15,8 @@ class Agent:
             return self.rag.generate_answer(query)
         else:
             prompt = f"Chat History:\n{memory_context}\n\nQuestion: {query}\nAnswer factually:"
-            return self.llm_service.generate(prompt, max_new_tokens=100)
+            answer = self.llm_service.generate(prompt, max_new_tokens=100)
+            return answer.strip(), ""
 
 
 if __name__ == "__main__":

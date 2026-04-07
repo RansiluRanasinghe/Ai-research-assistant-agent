@@ -122,6 +122,9 @@ with st.sidebar:
 for msg in st.session_state.chat_history:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
+        if msg.get("source_context"):
+            with st.expander("View Source Context"):
+                st.text(msg["source_context"])
 
 if prompt :=st.chat_input("Ask a question about your documents...", disabled=st.session_state.is_processing):
     st.session_state.chat_history.append({"role": "user", "content": prompt})
@@ -134,12 +137,20 @@ if prompt :=st.chat_input("Ask a question about your documents...", disabled=st.
         think_placeholder = st.empty()
         think_placeholder.markdown("<div class='thinking-text'>Thinking... </div>", unsafe_allow_html=True)
 
-        response = agent.run(prompt, memory_context=context)
+        response, source_context = agent.run(prompt, memory_context=context)
         response = response.replace("Assistant:", "").replace("User:", "").strip()
 
         think_placeholder.empty()
 
         st.write_stream(stream_text(response))
 
-    st.session_state.chat_history.append({"role": "assistant", "content": response})
+        if source_context:
+            with st.expander("View Source Context"):
+                st.text(source_context)
+
+    st.session_state.chat_history.append({
+        "role": "assistant",
+        "content": response, 
+        "source_context": source_context})
+    
     st.session_state.memory.add(prompt, response)                                            

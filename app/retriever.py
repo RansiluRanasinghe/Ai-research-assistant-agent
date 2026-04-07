@@ -70,7 +70,7 @@ class RAGPipeline:
 
         answer = self.llm_service.generate(prompt, max_new_tokens=200)
 
-        return answer.strip()
+        return answer.strip(), context
 
 if __name__ == "__main__":
 
