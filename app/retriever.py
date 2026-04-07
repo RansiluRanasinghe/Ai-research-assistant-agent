@@ -41,8 +41,26 @@ class VectorStore:
         distances, indices = self.index.search(query_vec, min(top_k, len(self.chunks)))
         faiss_results = [self.chunks[i] for i in indices[0]]
 
-        return results
-    
+        tokenized_query = query.lower().split(" ")
+        bm25_scores = self.bm25.get_scores(tokenized_query)
+        bm25_indices = np.argsort(bm25_scores)[::-1][:top_k]
+        bm25_results = [self.chunks[i] for i in bm25_indices]
+
+        combined_results = []
+        seen = set()
+
+        import itertools
+        for f_chunk, b_chunk in itertools.zip_longest(faiss_results, bm25_results):
+            if f_chunk and f_chunk not in seen:
+                combined_results.append((f_chunk, 0.0))
+                seen.add(f_chunk)
+
+            if b_chunk and b_chunk not in seen:
+                combined_results.append((b_chunk, 0.0))
+                seen.add(b_chunk)    
+
+        return combined_results[:top_k]
+
     def save(self, path):
 
         os.makedirs(path, exist_ok=True)
