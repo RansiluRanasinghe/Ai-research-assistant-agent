@@ -53,7 +53,7 @@ class RAGPipeline:
         self.vector_store = vector_store
         self.llm_service = llm_service 
 
-    def generate_answer(self, query, top_k=6):
+    def generate_answer(self, query, top_k=6, max_new_tokens=300):
 
         retrieved = self.vector_store.search(query, top_k=top_k)
         context = "\n\n".join([chunk for chunk, _ in retrieved])
@@ -68,7 +68,7 @@ class RAGPipeline:
         Question: {query}
         Answer:"""
 
-        answer = self.llm_service.generate(prompt, max_new_tokens=200)
+        answer = self.llm_service.generate(prompt, max_new_tokens=max_new_tokens)
 
         return answer.strip(), context
 

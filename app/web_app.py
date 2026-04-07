@@ -130,7 +130,7 @@ with st.sidebar:
                 summary_prompt = f"""Write a comprehensive summary of the main themes and findings present in this document.
                   Format it beautifully using Markdown."""
 
-                summary_response, _  = agent.run(summary_prompt, memory_context="")
+                summary_response, _  = agent.run(summary_prompt, memory_context="", max_new_tokens=1500)
 
                 st.success("Summary Generated!")
                 st.download_button("Download Summary", data=summary_response, file_name="research_summary.md", mime="text/markdown")
@@ -141,7 +141,7 @@ with st.sidebar:
                 stat_prompt = """Extract all numbers, percentages, and statistical data points from the document.
                   Present them in a strict Markdown table with two columns: 'Data Point' and 'Context'."""
                 
-                stat_response, _  = agent.run(stat_prompt, memory_context="")
+                stat_response, _  = agent.run(stat_prompt, memory_context="", max_new_tokens=1500)
 
                 st.success("Data Extracted!")
                 st.download_button("Download Data", data=stat_response, file_name="statistical_data.md", mime="text/markdown")

@@ -7,15 +7,16 @@ class Agent:
         self.rag = rag_pipeline
         self.llm_service = llm_service
 
-    def run(self, query, memory_context=""):
+    def run(self, query, memory_context="", max_new_tokens=300):
 
         research_keywords = ["research", "paper", "document", "study", "according", "what", "how", "why", "define", "explain", "who"]
 
         if any(kw in query.lower() for kw in research_keywords):
-            return self.rag.generate_answer(query)
+            return self.rag.generate_answer(query, max_new_tokens=max_new_tokens)
         else:
             prompt = f"Chat History:\n{memory_context}\n\nQuestion: {query}\nAnswer factually:"
-            answer = self.llm_service.generate(prompt, max_new_tokens=100)
+            chat_limit = 100 if max_new_tokens == 300 else max_new_tokens
+            answer = self.llm_service.generate(prompt, max_new_tokens=chat_limit)
             return answer.strip(), ""
 
 
