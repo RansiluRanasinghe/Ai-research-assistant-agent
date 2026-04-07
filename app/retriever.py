@@ -35,11 +35,13 @@ class VectorStore:
     def hybrid_search(self, query, top_k=6):
 
         if not self.chunks:
-            return []
+            return [], 999.0
 
         query_vec = self.emb_model.encode(query).astype(np.float32).reshape(1, -1)
         distances, indices = self.index.search(query_vec, min(top_k, len(self.chunks)))
         faiss_results = [self.chunks[i] for i in indices[0]]
+
+        best_distance = distances[0][0] if len(distances[0]) > 0 else 999.0
 
         tokenized_query = query.lower().split(" ")
         bm25_scores = self.bm25.get_scores(tokenized_query)
@@ -59,7 +61,7 @@ class VectorStore:
                 combined_results.append((b_chunk, 0.0))
                 seen.add(b_chunk)    
 
-        return combined_results[:top_k]
+        return combined_results[:top_k], best_distance
 
     def save(self, path):
 
