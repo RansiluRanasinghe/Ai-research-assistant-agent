@@ -30,18 +30,31 @@ class Agent:
             return answer.strip(), ""
         
     def web_search(self, query, max_new_tokens):
+        print(f"\nInitiating Web Search for: '{query}'")
 
         try:
             with DDGS() as ddgs:
-                results = ddgs.text(query, max_results=3)
+                results = list(ddgs.text(query, max_results=3, backend="lite"))
 
             if not results:
-                return "I couldn't find an answer in your documents or on the web.", ""
+                print("DDG 'lite' returned empty. Trying 'html' fallback...")
+                with DDGS() as ddgs:
+                    results = list(ddgs.text(query, max_results=5))
+
+            print(f"Successfully found {len(results)} web results.")        
+
+            if not results:
+                return "My web search was blocked by DuckDuckGo's anti-bot protections. Please try again in a few minutes!", ""       
 
             web_context =  "\n\n".join([f"Source: {res['title']}\n{res['body']}" for res in results])
 
-            prompt = f"""You are a helpful Research Assistant.
-            Based on the following live web search results, answer the user's question clearly and concisely.
+            prompt = f"""You are a precise Research Assistant.
+            Based on the following live web search results, answer the user's question.
+            
+            CRITICAL RULES:
+            1. Only use factual, real-world information.
+            2. IGNORE all references to video games, mods, forums, or fiction.
+            3. Be concise and direct.
             
             Web Results:
             {web_context}
@@ -53,7 +66,8 @@ class Agent:
             return answer.strip(), f"PULLED FROM THE WEB:\n\n{web_context}"
 
         except Exception as e:
-            return f"Error during web search: {str(e)}", ""  
+            print(f"Python Crash during web search: {e}")
+            return f"Web search failed due to a system error.", ""  
 
 
 if __name__ == "__main__":
