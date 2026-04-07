@@ -2,16 +2,16 @@
 
 # 🤖 AI Research Assistant Agent
 
-### RAG · LLM · Tool-Augmented Reasoning
+### Hybrid RAG · Local LLM · Agentic Web Routing · Streamlit
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![LangChain](https://img.shields.io/badge/LangChain-1ECB94?style=flat-square&logo=chainlink&logoColor=white)](https://langchain.com)
+[![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-black?style=flat-square)](https://ollama.com)
 [![FAISS](https://img.shields.io/badge/FAISS-Vector_DB-00457C?style=flat-square)](https://faiss.ai)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](https://streamlit.io)
 [![HuggingFace](https://img.shields.io/badge/HuggingFace-Transformers-FFD21E?style=flat-square&logo=huggingface&logoColor=black)](https://huggingface.co)
-[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)](https://pytorch.org)
 [![License](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
 
-*An AI-powered research assistant that retrieves, understands, and summarizes knowledge from your own documents — grounded in source context, not hallucination.*
+*An enterprise-grade, fully local AI research assistant — engineered from scratch. Retrieves knowledge using Hybrid Search (FAISS + BM25), guarantees transparency with source citations, and autonomously routes to the live internet when document knowledge falls short.*
 
 </div>
 
@@ -19,9 +19,11 @@
 
 ## Overview
 
-This project implements a **fully modular AI Research Assistant Agent** built on modern LLM engineering principles. Unlike traditional chatbots that rely solely on parametric knowledge, this system combines **Retrieval-Augmented Generation (RAG)** with an **agent-based decision layer** to deliver accurate, source-grounded responses from external document collections.
+This project implements a **fully modular AI Research Assistant Agent** built on modern AI engineering principles, **completely bypassing heavy wrapper libraries like LangChain or LlamaIndex** to ensure deep architectural control.
 
-The architecture is designed to be extensible — swap out any component (LLM, embeddings, vector store) without breaking the rest of the pipeline.
+Running **100% locally via Ollama**, this system combines **Hybrid Retrieval-Augmented Generation (RAG)** with an **agentic decision layer**. It intelligently decides whether to extract answers from your uploaded documents or pivot to real-time web scraping — all while providing transparent citations so you never have to blindly trust the AI.
+
+> Building a RAG system with LangChain is straightforward. Building one entirely from scratch, without abstraction libraries, running fully offline — that's an architectural challenge. This project does exactly that.
 
 ---
 
@@ -29,72 +31,74 @@ The architecture is designed to be extensible — swap out any component (LLM, e
 
 | Feature | Description |
 |---|---|
-| 📄 **Document Ingestion** | Load and process PDFs and plain text files |
-| 🔍 **Semantic Search** | Vector similarity retrieval over embedded knowledge chunks |
-| 🧠 **RAG Pipeline** | Context injection into LLM prompts for grounded responses |
-| 🤖 **Agent Layer** | Decision logic for when to retrieve vs. respond directly |
-| 💬 **Conversation Memory** | Maintains context across multi-turn interactions |
-| 📊 **Source Attribution** | Every response is tied back to its source documents |
+| 🧠 **Hybrid Search Retrieval** | Combines FAISS (Semantic Vector Search) with BM25 (Exact Keyword Match) to eliminate "keyword blindness" and retrieve highly accurate document chunks |
+| 🌐 **Agentic Web Fallback** | A Smart Router that monitors FAISS distance scores — if a query falls outside the document's scope, the agent autonomously pivots to a live DuckDuckGo web search |
+| 📚 **Transparent Citations** | Eliminates the "black box" problem. Every response includes a UI expander revealing the exact document paragraphs or live web URLs used to generate the answer |
+| 🛠️ **Utility Action Engine** | Automated background prompts allowing users to instantly generate 1-page Summary Reports or extract statistical data into downloadable Markdown files |
+| 🎨 **Reactive Streamlit UI** | A sleek, state-managed web interface featuring asynchronous processing, animated "Thinking" states, and secure document session management |
+| 🔒 **100% Local Processing** | Uses `llama3.2:1b` via Ollama and local SentenceTransformers — no cloud APIs, no data leaks, fully offline-capable for document chatting |
 
 ---
 
 ## System Architecture
 
 ```
-User Query
-    │
-    ▼
-┌─────────────────────┐
-│   Agent (Router)    │  ← Decides: retrieve or respond directly
-└─────────┬───────────┘
-          │
-          ▼
-┌─────────────────────┐
-│  Retriever (FAISS)  │  ← Semantic search over vector store
-└─────────┬───────────┘
-          │
-          ▼
-┌─────────────────────┐
-│  Context Injection  │  ← Relevant chunks added to prompt
-└─────────┬───────────┘
-          │
-          ▼
-┌─────────────────────┐
-│   LLM Generation    │  ← Response grounded in retrieved context
-└─────────┬───────────┘
-          │
-          ▼
-  Final Answer + Sources
+User Query ➔ Streamlit Web UI
+                 │
+                 ▼
+          Agent (Smart Router)
+                 │
+     Is this a document research query?
+     ├── [YES] ➔ Hybrid Retriever (FAISS Vectors + BM25 Keywords)
+     │                 │
+     │                 ▼
+     │            Is the FAISS distance score strong?
+     │            ├── [YES] ➔ Extract Context ──────────────┐
+     │            └── [NO]  ➔ Trigger Web Fallback ─────────┤
+     │                                                       │
+     └── [NO]  ➔ DuckDuckGo Live Web Scraper ───────────────┘
+                                                             │
+                                                             ▼
+                                          Ollama LLM (llama3.2) + Injected Context
+                                                             │
+                                                             ▼
+                                      Final Answer + Transparent Source Citations
 ```
+
+The Smart Router is the core differentiator. Rather than blindly querying the vector store on every request, the agent actively evaluates FAISS distance scores to determine retrieval confidence — then decides whether to trust the document index or escalate to a live web search.
 
 ---
 
 ## Core Components
 
-**LLM Layer** — Natural language understanding and response generation via open-source models or the Gemini API.
+**LLM Engine (Ollama)** — Runs `llama3.2:1b` entirely on-device. No API keys, no rate limits, no data leaving the machine. Swappable to larger 8B models with a single config change.
 
-**Embedding Model** — Converts text into dense vector representations using SentenceTransformers for semantic similarity matching.
+**Hybrid Retriever (FAISS + BM25)** — Dense vector search handles semantic understanding; sparse BM25 anchors exact keyword matches. Together they eliminate the "keyword blindness" problem that plagues pure vector search systems.
 
-**Vector Database (FAISS)** — Stores embeddings and enables fast, scalable nearest-neighbor search at query time.
+**Embedding Model** — `all-MiniLM-L6-v2` via SentenceTransformers, cached locally. Converts document chunks and queries into dense vector representations for similarity matching.
 
-**Retriever / RAG Pipeline** — Fetches the most relevant document chunks and injects them into the LLM context window.
+**Agentic Router** — The decision layer that monitors retrieval confidence scores in real time and autonomously selects between the document pipeline and the web fallback.
 
-**Agent Layer** — Routing logic that decides when to trigger retrieval versus answer from general knowledge directly.
+**Web Fallback (DuckDuckGo)** — When document knowledge is insufficient, the agent scrapes live search results. Implements a `lite` HTML backend fallback to handle rate-limiting gracefully.
 
-**Memory Module** — Persists conversation history to maintain coherent, context-aware multi-turn dialogue.
+**Memory Module** — Persists conversation history across turns to maintain coherent, context-aware multi-turn dialogue without re-indexing.
+
+**Utility Action Engine** — Background prompt templates that allow one-click generation of Summary Reports and Statistical Data extractions, exported as downloadable Markdown files.
 
 ---
 
 ## Tech Stack
 
-![Python](https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white)
-![FAISS](https://img.shields.io/badge/-FAISS-00457C?style=flat-square)
-![LangChain](https://img.shields.io/badge/-LangChain-1ECB94?style=flat-square&logo=chainlink&logoColor=white)
-![LlamaIndex](https://img.shields.io/badge/-LlamaIndex-7C3AED?style=flat-square)
-![HuggingFace](https://img.shields.io/badge/-Transformers-FFD21E?style=flat-square&logo=huggingface&logoColor=black)
-![Gemini](https://img.shields.io/badge/-Gemini_API-4285F4?style=flat-square&logo=google&logoColor=white)
-![SentenceTransformers](https://img.shields.io/badge/-SentenceTransformers-FF6F00?style=flat-square)
-![PyTorch](https://img.shields.io/badge/-PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
+| Layer | Technology |
+|---|---|
+| **Frontend** | Streamlit |
+| **LLM Engine** | Ollama (`llama3.2:1b` — modular for 8B models) |
+| **Embeddings** | `all-MiniLM-L6-v2` (SentenceTransformers, locally cached) |
+| **Vector Database** | FAISS (Facebook AI Similarity Search) |
+| **Keyword Retrieval** | BM25 (`rank_bm25`) |
+| **Web Search** | DuckDuckGo Search (`ddgs`) |
+| **Document Processing** | `pypdf`, native Python chunking with overlap |
+| **Runtime** | Python 3.10+, fully offline-capable |
 
 ---
 
@@ -104,24 +108,16 @@ User Query
 ai-research-assistant-agent/
 │
 ├── app/
-│   ├── main.py           # Entry point (CLI interface)
-│   ├── agent.py          # Agent routing and decision logic
-│   ├── retriever.py      # RAG pipeline
-│   ├── embeddings.py     # Embedding model setup
-│   ├── llm.py            # LLM interface
-│   ├── memory.py         # Conversation memory
-│   └── utils.py          # Data loading & preprocessing
+│   ├── web_app.py        # Streamlit UI & application state management
+│   ├── agent.py          # Agent routing and web fallback logic
+│   ├── retriever.py      # Hybrid RAG pipeline (FAISS + BM25)
+│   ├── embeddings.py     # Local SentenceTransformer setup
+│   ├── llm.py            # Local Ollama API interface
+│   ├── memory.py         # Conversational context memory
+│   └── utils.py          # PDF parsing & overlapping text chunker
 │
-├── data/
-│   ├── raw/              # Input documents (PDFs, text files)
-│   └── processed/        # Chunked and cleaned text data
-│
-├── vector_store/
-│   └── faiss_index/      # Persisted vector index
-│
-├── notebooks/
-│   └── experiments.ipynb # Experimentation and prototyping
-│
+├── user_uploads/         # Temporary storage for active session documents
+├── vector-store/         # Persisted indices (index.faiss, chunks.npy, bm25.pkl)
 ├── requirements.txt
 └── README.md
 ```
@@ -130,95 +126,103 @@ ai-research-assistant-agent/
 
 ## Getting Started
 
-### 1. Clone the Repository
+### 1. Prerequisites
+
+You must have [Ollama](https://ollama.com) installed. Once installed, pull the model:
 
 ```bash
-git clone https://github.com/your-username/ai-research-assistant-agent.git
+ollama run llama3.2:1b
+```
+
+### 2. Clone the Repository
+
+```bash
+git clone https://github.com/RansiluRanasinghe/ai-research-assistant-agent.git
 cd ai-research-assistant-agent
 ```
 
-### 2. Install Dependencies
+### 3. Install Dependencies
+
+It is recommended to use a virtual environment.
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configure API Keys
+> Required packages: `streamlit`, `requests`, `sentence-transformers`, `faiss-cpu`, `rank_bm25`, `pypdf`, `ddgs`, `numpy`
 
-Create a `.env` file in the project root and add your credentials:
-
-```env
-HUGGINGFACE_API_KEY=your_key_here
-GEMINI_API_KEY=your_key_here
-```
-
-### 4. Add Your Documents
-
-Place your PDF or text files in the `data/raw/` directory.
-
-### 5. Run the Assistant
+### 4. Run the Application
 
 ```bash
-python app/main.py
+cd app
+streamlit run web_app.py
 ```
 
 ---
 
-## How It Works
+## Example Workflow
 
-```
-Step 1 │ INGEST      Documents are loaded and split into optimized chunks
-Step 2 │ EMBED       Each chunk is converted to a vector via SentenceTransformers
-Step 3 │ INDEX       Embeddings are stored in a FAISS vector index
-Step 4 │ QUERY       User question is embedded and matched against the index
-Step 5 │ RETRIEVE    Top-k relevant chunks are fetched
-Step 6 │ GENERATE    LLM produces a response grounded in retrieved context
-Step 7 │ ROUTE       Agent decides: retrieval path or direct response
-Step 8 │ REMEMBER    Interaction stored in memory for conversational continuity
-```
+**1. Upload** — Drag and drop a research PDF into the sidebar. The UI locks and displays an animated status indicator while the document is chunked and indexed into FAISS and BM25.
 
----
+**2. Hybrid Query** — Ask a specific question containing a technical acronym. Watch BM25 anchor the exact phrase while FAISS simultaneously retrieves semantic context — together eliminating retrieval gaps that either method alone would miss.
 
-## Example Use Cases
+**3. Verify** — Click the `📚 View Source Context` expander below the AI's answer to audit the exact document chunks used to generate the response. Full transparency, no black box.
 
-- 📚 Research paper summarization and Q&A
-- 🔬 Literature review assistance
-- 🗂️ Custom knowledge base querying
-- 📝 Technical documentation assistant
+**4. Extract Data** — Click `Extract Statistical Data` in the sidebar to force the LLM to scan the entire PDF and generate a downloadable Markdown table of all numerical data.
+
+**5. Test the Agent** — Ask `"What is the weather in Tokyo?"` — watch the agent recognize the PDF cannot answer this, bypass the vector database entirely, and return a live DuckDuckGo result with a web citation.
 
 ---
 
-## Key Learnings
+## Key Engineering Highlights
 
-- ✅ Built a complete RAG pipeline from scratch
-- ✅ Implemented vector search and semantic retrieval with FAISS
-- ✅ Designed a modular, swappable agent architecture
-- ✅ Integrated LLMs with external knowledge for grounded generation
-- ✅ Reduced hallucination through context injection
+✅ **Built a complete RAG architecture from scratch** — no LangChain, no LlamaIndex, no abstraction layers hiding the data flow.
+
+✅ **Solved "Keyword Blindness"** — engineered a custom hybrid search algorithm fusing dense FAISS retrieval with sparse BM25 for coverage that neither achieves alone.
+
+✅ **Designed an agentic confidence threshold** — the Smart Router evaluates FAISS distance scores at runtime to decide retrieval vs. web fallback, rather than blindly querying both.
+
+✅ **Overcame web scraper rate-limiting** — implemented a graceful fallback to DuckDuckGo's `lite` HTML backend when the primary API is throttled.
+
+✅ **Mastered Streamlit state management** — the chat interface stays responsive and thread-safe during heavy backend indexing operations.
+
+✅ **Reduced hallucination via grounded generation** — every response is anchored to retrieved source chunks, with citations surfaced directly in the UI.
 
 ---
 
 ## Roadmap
 
-- [ ] Web UI using Streamlit or React
-- [ ] Multi-document reasoning across large corpora
-- [ ] Tool integration (live web search, external APIs)
+- [x] ~~Web UI using Streamlit~~
+- [x] ~~Agentic tool integration (live web search)~~
+- [x] ~~Hybrid Search implementation (FAISS + BM25)~~
 - [ ] Evaluation pipeline (ROUGE, BLEU, faithfulness metrics)
-- [ ] Dockerized deployment with cloud hosting
+- [ ] GraphRAG integration for complex entity relationship mapping
+- [ ] Multi-agent collaboration for advanced cross-document synthesis
+- [ ] Dockerized deployment configuration
+
+---
+
+## Use Cases
+
+- 📚 Research paper summarization and deep Q&A
+- 🔬 Literature review and evidence extraction
+- 🗂️ Custom private knowledge base querying
+- 📝 Technical documentation assistant
+- 📊 Statistical data extraction from dense reports
 
 ---
 
 ## Author
 
-**Ransilu Ranasinghe**
+**Ransilu Ranasinghe** — Software Engineering Undergraduate | AI & Backend Developer
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](www.linkedin.com/in/ransiluranasinghe)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ransiluranasinghe)
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/RansiluRanasinghe)
 
 ---
 
 <div align="center">
 
-⭐ **Found this useful? Give it a star and share your feedback!**
+⭐ **Found this architecture useful? Give it a star and share your feedback!**
 
 </div>
