@@ -92,7 +92,7 @@ class RAGPipeline:
 
     def generate_answer(self, query, top_k=6, max_new_tokens=300):
 
-        retrieved = self.vector_store.hybrid_search(query, top_k=top_k)
+        retrieved, best_distance = self.vector_store.hybrid_search(query, top_k=top_k)
         context = "\n\n".join([chunk for chunk, _ in retrieved])
 
         prompt = f"""You are a precise Research Assistant. 
@@ -107,7 +107,7 @@ class RAGPipeline:
 
         answer = self.llm_service.generate(prompt, max_new_tokens=max_new_tokens)
 
-        return answer.strip(), context
+        return answer.strip(), context, best_distance
 
 if __name__ == "__main__":
 
