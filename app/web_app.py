@@ -133,7 +133,22 @@ with st.sidebar:
                 summary_response, _  = agent.run(summary_prompt, memory_context="")
 
                 st.success("Summary Generated!")
-                st.download_button("Download Summary", data=summary_response, file_name="research_summary.md", mime="text/markdown") 
+                st.download_button("Download Summary", data=summary_response, file_name="research_summary.md", mime="text/markdown")
+
+        if st.button("Extract Statistical Data"):
+            with st.spinner("Mining Data ..."):
+
+                stat_prompt = """Extract all numbers, percentages, and statistical data points from the document.
+                  Present them in a strict Markdown table with two columns: 'Data Point' and 'Context'."""
+                
+                stat_response, _  = agent.run(stat_prompt, memory_context="")
+
+                st.success("Data Extracted!")
+                st.download_button("Download Data", data=stat_response, file_name="statistical_data.md", mime="text/markdown")
+
+    else:
+        st.info("Upload and index a document to unlock Utility Actions.")            
+
 
 for msg in st.session_state.chat_history:
     with st.chat_message(msg["role"]):
