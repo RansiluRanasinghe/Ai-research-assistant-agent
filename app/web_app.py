@@ -119,6 +119,22 @@ with st.sidebar:
         st.session_state.processed_files = []
         st.rerun()
 
+    st.divider()
+    st.header("Utility Actions")
+
+    if st.session_state.get("processed_files"):
+        if st.button("Generate Summary Report"):
+
+            with st.spinner("Writing Summary ..."):
+
+                summary_prompt = f"""Write a comprehensive summary of the main themes and findings present in this document.
+                  Format it beautifully using Markdown."""
+
+                summary_response, _  = agent.run(summary_prompt, memory_context="")
+
+                st.success("Summary Generated!")
+                st.download_button("Download Summary", data=summary_response, file_name="research_summary.md", mime="text/markdown") 
+
 for msg in st.session_state.chat_history:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
