@@ -67,6 +67,10 @@ class VectorStore:
         faiss.write_index(self.index, os.path.join(path, "index.faiss"))
         np.save(os.path.join(path, "chunks.npy"), self.chunks)
 
+        if self.bm25:
+            with open(os.path.join(path, "bm25.pkl"), "wb") as f:
+                pickle.dump(self.bm25, f)
+
     def load(self, path):
 
         self.index = faiss.read_index(os.path.join(path, "index.faiss"))
