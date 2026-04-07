@@ -5,6 +5,9 @@ from embeddings import EmbeddingModel
 from llm import LLMService
 from utils import load_document, chunk_text
 
+import pickle
+from rank_bm25 import BM25Okapi
+
 class VectorStore:
 
     def __init__(self, embedding_model, dimension=384):
