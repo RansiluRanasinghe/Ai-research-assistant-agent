@@ -6,4 +6,4 @@ pypdf
 numpy
 streamlit
 rank_bm25
-duckduckgo-search
+ddgs

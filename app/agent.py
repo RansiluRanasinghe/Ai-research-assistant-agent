@@ -1,7 +1,7 @@
 from retriever import RAGPipeline
 from llm import LLMService
 
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 
 class Agent:
 
