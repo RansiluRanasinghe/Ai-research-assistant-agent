@@ -77,6 +77,11 @@ class VectorStore:
         self.chunks = np.load(os.path.join(path, "chunks.npy"), allow_pickle=True).tolist()
         self.dimension = self.index.d
 
+        bm25_path = os.path.join(path, "bm25.pkl")
+        if os.path.exists(bm25_path):
+            with open(bm25_path, "rb") as f:
+                self.bm25 = pickle.load(f)
+
 class RAGPipeline:
 
     def __init__(self, vector_store, llm_service):
