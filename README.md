@@ -174,6 +174,32 @@ streamlit run web_app.py
 
 ---
 
+## Features in Action
+
+**100% Local Document Ingestion**
+
+![Local Ingestion UI](assests\ingestion-ui.png)
+
+> Absolute Data Privacy: The reactive Streamlit interface safely parses, chunks, and indexes complex PDFs directly into a local vector store. By operating entirely on-device, the system guarantees zero data leaks and requires no external cloud APIs.
+
+**Solving "Keyword Blindness"**
+
+![Local Ingestion UI](assests\hybrid-search.png)
+
+> Precision Hybrid Retrieval: Pure vector databases often struggle with exact terminology. This engine fuses the semantic understanding of FAISS with the exact-match precision of BM25, ensuring the AI never misses highly specific acronyms (like "DORA") or niche technical workflows.
+
+**Zero-Tolerance for Hallucinations**
+
+![Local Ingestion UI](assests\transparent-citations.png)
+
+> Transparent Citations: Eliminating the "black box" of AI generation. Every response is securely anchored to an expandable UI citation block, allowing users to instantly verify the LLM's claims against the raw, extracted document chunks.
+
+**Autonomous Agentic Web Routing**
+
+![Local Ingestion UI](assests\web-fallback.png)
+
+> Dynamic Fallback Logic: A custom decision engine continuously monitors FAISS distance scores. When a query falls outside the document's scope (e.g., real-time sports scores), the agent actively intercepts the request, bypasses the local index, and seamlessly scrapes DuckDuckGo to inject live web context.
+
 ## Key Engineering Highlights
 
 ✅ **Built a complete RAG architecture from scratch** — no LangChain, no LlamaIndex, no abstraction layers hiding the data flow.
