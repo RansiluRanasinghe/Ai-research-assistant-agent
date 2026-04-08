@@ -1,1 +1,13 @@
+# Secrets
+.env
 *.env
+
+# Python specific
+__pycache__/
+venv/
+env/
+*.pyc
+
+# Project specific data (CRITICAL)
+vector-store/
+user_uploads/
