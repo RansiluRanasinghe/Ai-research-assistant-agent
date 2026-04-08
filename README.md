@@ -184,21 +184,23 @@ streamlit run web_app.py
 
 **Solving "Keyword Blindness"**
 
-![Local Ingestion UI](assets/hybrid-search.png)
+![Hybrid Search Example](assets/hybrid-search.png)
 
 > Precision Hybrid Retrieval: Pure vector databases often struggle with exact terminology. This engine fuses the semantic understanding of FAISS with the exact-match precision of BM25, ensuring the AI never misses highly specific acronyms (like "DORA") or niche technical workflows.
 
 **Zero-Tolerance for Hallucinations**
 
-![Local Ingestion UI](assets/transparent-citations.png)
+![Transparent Citations](assets/transparent-citations.png)
 
 > Transparent Citations: Eliminating the "black box" of AI generation. Every response is securely anchored to an expandable UI citation block, allowing users to instantly verify the LLM's claims against the raw, extracted document chunks.
 
 **Autonomous Agentic Web Routing**
 
-![Local Ingestion UI](assets/web-fallback.png)
+![Agentic Web Router](assets/web-fallback.png)
 
 > Dynamic Fallback Logic: A custom decision engine continuously monitors FAISS distance scores. When a query falls outside the document's scope (e.g., real-time sports scores), the agent actively intercepts the request, bypasses the local index, and seamlessly scrapes DuckDuckGo to inject live web context.
+
+---
 
 ## Key Engineering Highlights
 
